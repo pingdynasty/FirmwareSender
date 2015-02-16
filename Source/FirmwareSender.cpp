@@ -14,6 +14,8 @@
 #define DEFAULT_BLOCK_SIZE (250-MESSAGE_SIZE)
 #define DEFAULT_BLOCK_DELAY 20 // wait in milliseconds between sysex messages
 
+bool quiet = false;
+
 class CommandLineException : public std::exception {
 private:
   juce::String cause;
@@ -30,7 +32,7 @@ public:
 class FirmwareSender {
 private:
   bool running = false;
-  bool verbose = true;
+  bool verbose = false;
   juce::ScopedPointer<MidiOutput> midiout;
   juce::ScopedPointer<File> fileout;
   juce::ScopedPointer<File> input;
@@ -98,7 +100,7 @@ public:
 	usage();
 	throw CommandLineException(juce::String::empty);
       }else if(arg.compare("-q") == 0 || arg.compare("--quiet") == 0 ){
-	verbose = false;
+	quiet = true;
       }else if(arg.compare("-v") == 0 || arg.compare("--verbose") == 0 ){
 	verbose = true;
       }else if(arg.compare("-l") == 0 || arg.compare("--list") == 0){
@@ -139,7 +141,7 @@ public:
 
   void run(){
     running = true;
-    if(verbose){
+    if(!quiet){
       std::cout << "Sending file " << input->getFileName() << std::endl; 
       if(midiout != NULL)
 	std::cout << "\tto MIDI output" << std::endl; 
@@ -188,7 +190,7 @@ public:
 	// last block
 	encodeInt(block, checksum);
 	send(block);
-	if(verbose)
+	if(!quiet)
 	  std::cout << "checksum 0x" << std::hex << checksum << std::endl;
 	// stream.write(sysex, len);
 	// send((unsigned char*)stream.getData(), stream.getDataSize());
@@ -239,7 +241,8 @@ public:
 FirmwareSender app;
 
 void sigfun(int sig){
-  std::cout << "shutting down" << std::endl;
+  if(!quiet)
+    std::cout << "shutting down" << std::endl;
   app.shutdown();
   (void)signal(SIGINT, SIG_DFL);
 }

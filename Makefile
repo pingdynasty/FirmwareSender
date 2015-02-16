@@ -1,10 +1,10 @@
 # Paths 
 BUILDROOT = .
-TARGET = FirmwareSender
-BUILD = $(BUILDROOT)/Build
-SOURCE = $(BUILDROOT)/Source
-BIN = $(BUILDROOT)/bin
-JUCE = /home/mars/devel/juce
+TARGET    = FirmwareSender
+BUILD     = $(BUILDROOT)/Build
+SOURCE    = $(BUILDROOT)/Source
+BIN       = $(BUILDROOT)/bin
+JUCE      = $(HOME)/devel/juce
 
 # Tools
 CC  = gcc
