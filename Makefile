@@ -1,38 +1,42 @@
-TARGET=FirmwareSender
-BUILD=Build
+# Paths 
+BUILDROOT = .
+TARGET = FirmwareSender
+BUILD = $(BUILDROOT)/Build
+SOURCE = $(BUILDROOT)/Source
+BIN = $(BUILDROOT)/bin
+JUCE = /home/mars/devel/juce
 
 # Tools
-CC=gcc
-CXX=g++
-LD=g++
+CC  = gcc
+CXX = g++
+LD  = g++
 
-CFLAGS  += -g
+# Flags
+CFLAGS   = -g
+CFLAGS  += -I$(SOURCE) -I$(JUCE)/
 CXXFLAGS = -std=c++11 $(CFLAGS) 
 CFLAGS  += -std=gnu99
 LDLIBS   = -lm -lpthread -ldl -lX11 -lasound
 
-JUCE = ~/devel/juce
-# Set up search path
-vpath %.cpp $(JUCE)/modules/juce_core
-vpath %.cpp $(JUCE)/modules/juce_audio_basics
-vpath %.cpp $(JUCE)/modules/juce_audio_devices
-vpath %.cpp $(JUCE)/modules/juce_events
-# vpath %.cpp ../Source
-# vpath %.c ../Source
-# vpath %.cpp ../sender
-# vpath %.cpp ../sender
-
-C_SRC  = sysex.c crc32.c
+C_SRC    = sysex.c crc32.c
 CPP_SRC  = FirmwareSender.cpp 
 CPP_SRC += juce_core.cpp juce_audio_basics.cpp juce_audio_devices.cpp juce_events.cpp
 
 OBJS = $(C_SRC:%.c=Build/%.o) $(CPP_SRC:%.cpp=Build/%.o)
 
+# Set up search path
+vpath %.cpp $(JUCE)/modules/juce_core
+vpath %.cpp $(JUCE)/modules/juce_audio_basics
+vpath %.cpp $(JUCE)/modules/juce_audio_devices
+vpath %.cpp $(JUCE)/modules/juce_events
+vpath %.cpp $(SOURCE)
+vpath %.c   $(SOURCE)
+
 all: $(TARGET)
 
 # Build executable 
 $(TARGET) : $(OBJS)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
+	$(LD) $(LDFLAGS) -o $(BIN)/$@ $(OBJS) $(LDLIBS)
 
 # compile and generate dependency info
 $(BUILD)/%.o: %.c

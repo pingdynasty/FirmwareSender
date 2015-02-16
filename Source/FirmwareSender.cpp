@@ -4,11 +4,11 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <math.h>
-#include "../../OwlNest/JuceLibraryCode/JuceHeader.h"
-#include "../Source/OpenWareMidiControl.h"
-#include "../Source/crc32.h"
-#include "../Source/sysex.h"
-#include "../Source/MidiStatus.h"
+#include "JuceHeader.h"
+#include "OpenWareMidiControl.h"
+#include "crc32.h"
+#include "sysex.h"
+#include "MidiStatus.h"
 
 #define MESSAGE_SIZE 8
 #define DEFAULT_BLOCK_SIZE (250-MESSAGE_SIZE)
