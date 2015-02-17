@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="ByWD93" name="FirmwareSender" projectType="consoleapp" version="1.0.0"
+              bundleIdentifier="com.pingdynasty.FirmwareSender" includeBinaryInAppConfig="0"
+              jucerVersion="3.1.0" defines="">
+  <MAINGROUP id="K9DkuU" name="FirmwareSender">
+    <GROUP id="{4B46E67F-1CBB-E89E-D4E9-09104B386A9D}" name="Source">
+      <FILE id="rYJ6Qb" name="AppConfig.h" compile="0" resource="0" file="Source/AppConfig.h"/>
+      <FILE id="gdaftZ" name="FirmwareSender.cpp" compile="1" resource="0"
+            file="Source/FirmwareSender.cpp"/>
+      <FILE id="m611SD" name="JuceHeader.h" compile="0" resource="0" file="Source/JuceHeader.h"/>
+      <FILE id="UDqEO8" name="MidiStatus.h" compile="0" resource="0" file="Source/MidiStatus.h"/>
+      <FILE id="oqI18V" name="OpenWareMidiControl.h" compile="0" resource="0"
+            file="Source/OpenWareMidiControl.h"/>
+      <FILE id="XIU1O1" name="crc32.c" compile="1" resource="0" file="Source/crc32.c"/>
+      <FILE id="E0IWRo" name="crc32.h" compile="0" resource="0" file="Source/crc32.h"/>
+      <FILE id="OVe9cb" name="sysex.c" compile="1" resource="0" file="Source/sysex.c"/>
+      <FILE id="ZLePts" name="sysex.h" compile="0" resource="0" file="Source/sysex.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <LINUX_MAKE targetFolder="Builds/Linux" extraCompilerFlags="-std=c++11">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
+                       targetName="FirmwareSender"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="2"
+                       targetName="FirmwareSender"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce/modules"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+    <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-std=c++11">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       isDebug="1" optimisation="1" targetName="FirmwareSender"/>
+        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       isDebug="0" optimisation="2" targetName="FirmwareSender"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_audio_formats" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_core" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_events" showAllCode="1" useLocalCopy="1"/>
+  </MODULES>
+  <JUCEOPTIONS/>
+</JUCERPROJECT>
