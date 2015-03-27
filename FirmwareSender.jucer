@@ -8,7 +8,6 @@
       <FILE id="rYJ6Qb" name="AppConfig.h" compile="0" resource="0" file="Source/AppConfig.h"/>
       <FILE id="gdaftZ" name="FirmwareSender.cpp" compile="1" resource="0"
             file="Source/FirmwareSender.cpp"/>
-      <FILE id="m611SD" name="JuceHeader.h" compile="0" resource="0" file="Source/JuceHeader.h"/>
       <FILE id="UDqEO8" name="MidiStatus.h" compile="0" resource="0" file="Source/MidiStatus.h"/>
       <FILE id="oqI18V" name="OpenWareMidiControl.h" compile="0" resource="0"
             file="Source/OpenWareMidiControl.h"/>
@@ -27,11 +26,11 @@
                        targetName="FirmwareSender"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../../juce/modules"/>
-        <MODULEPATH id="juce_events" path="../../juce/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../juce/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../juce/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../juce/modules"/>
+        <MODULEPATH id="juce_core" path="../juce/modules"/>
+        <MODULEPATH id="juce_events" path="../juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../juce/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
     <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-std=c++11">
@@ -42,11 +41,11 @@
                        isDebug="0" optimisation="2" targetName="FirmwareSender"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_events" path="../../juce"/>
-        <MODULEPATH id="juce_core" path="../../juce"/>
-        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
-        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
-        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../juce"/>
+        <MODULEPATH id="juce_core" path="../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../juce"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2010 targetFolder="Builds/VisualStudio2010" extraCompilerFlags="-std=c++11">
@@ -57,11 +56,11 @@
                        isDebug="0" optimisation="2" targetName="FirmwareSender"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_events" path="../../juce"/>
-        <MODULEPATH id="juce_core" path="../../juce"/>
-        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
-        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
-        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../juce"/>
+        <MODULEPATH id="juce_core" path="../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../juce"/>
       </MODULEPATHS>
     </VS2010>
   </EXPORTFORMATS>
