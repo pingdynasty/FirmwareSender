@@ -11,7 +11,7 @@
 #include "MidiStatus.h"
 
 #define MESSAGE_SIZE 8
-#define DEFAULT_BLOCK_SIZE (250-MESSAGE_SIZE)
+#define DEFAULT_BLOCK_SIZE (248-MESSAGE_SIZE)
 #define DEFAULT_BLOCK_DELAY 20 // wait in milliseconds between sysex messages
 
 bool quiet = false;
