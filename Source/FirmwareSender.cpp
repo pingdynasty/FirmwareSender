@@ -1,5 +1,5 @@
 /*
-  g++ -std=c++11 -Isender sender/FirmwareSender.cpp Source/sysex.c ../OwlNest/JuceLibraryCode/modules/juce_core/juce_core.cpp ../OwlNest/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp ../OwlNest/JuceLibraryCode/modules/juce_audio_devices/juce_audio_devices.cpp ../OwlNest/JuceLibraryCode/modules/juce_events/juce_events.cpp -lpthread -ldl -lX11 -lasound
+  g++ -std=c++11 -ISource -IJuceLibraryCode Source/FirmwareSender.cpp Source/sysex.c JuceLibraryCode/modules/juce_core/juce_core.cpp JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp JuceLibraryCode/modules/juce_audio_devices/juce_audio_devices.cpp JuceLibraryCode/modules/juce_events/juce_events.cpp -lpthread -ldl -lX11 -lasound
 */
 #include <unistd.h>
 #include <stdint.h>
@@ -39,6 +39,8 @@ private:
   juce::ScopedPointer<OutputStream> out;
   int blockDelay = DEFAULT_BLOCK_DELAY;
   int blockSize = DEFAULT_BLOCK_SIZE;
+  int storeSlot = -1;
+  bool doRun = true;
 public:
   void listDevices(const StringArray& names){
     for(int i=0; i<names.size(); ++i)
@@ -86,6 +88,7 @@ public:
 	      << "-in FILE\tinput FILE" << std::endl
 	      << "-out DEVICE\tsend output to MIDI interface DEVICE" << std::endl
 	      << "-save FILE\twrite output to FILE" << std::endl
+	      << "-slot NUM\tstore in flash sector NUM" << std::endl
 	      << "-d NUM\t\tdelay for NUM milliseconds between blocks" << std::endl
 	      << "-s NUM\t\tlimit SysEx messages to NUM bytes" << std::endl
 	      << "-q or --quiet\treduce status output" << std::endl
@@ -113,6 +116,8 @@ public:
 	blockDelay = juce::String(argv[i]).getIntValue();
       }else if(arg.compare("-s") == 0 && ++i < argc){
 	blockSize = juce::String(argv[i]).getIntValue() - MESSAGE_SIZE;
+      }else if(arg.compare("-slot") == 0 && ++i < argc){
+	storeSlot = juce::String(argv[i]).getIntValue();
       }else if(arg.compare("-in") == 0 && ++i < argc){
 	juce::String name = juce::String(argv[i]);
 	input = new juce::File(name);
@@ -152,7 +157,7 @@ public:
     int binblock = (int)floor(blockSize*7/8);
     // int sysblock = (int)ceil(binblock*8/7);
 
-    InputStream* in = input->createInputStream();
+    juce::ScopedPointer<InputStream> in = input->createInputStream();
     if(fileout != NULL)
       out = fileout->createOutputStream();
 
@@ -167,14 +172,14 @@ public:
     unsigned char sysex[blockSize];
     int size = input->getSize(); // amount of data, excluding checksum
     encodeInt(block, size);
-    // send first message with index and length, then start new message
+    // send first message with index and length
     send(block);
-    block = MemoryBlock();
-    block.append(header, sizeof(header));
-    encodeInt(block, packageIndex++);
 
     uint32_t checksum = 0;
     for(int i=0; i < size && running;){
+      block = MemoryBlock();
+      block.append(header, sizeof(header));
+      encodeInt(block, packageIndex++);
       int len = in->read(buffer, binblock);
       checksum = crc32(buffer, len, checksum);
       i += len;
@@ -185,27 +190,36 @@ public:
 	std::cout << "/" << len << " bytes binary/sysex (total " << 
 	  i << " of " << size << " bytes)" << std::endl;
       block.append(sysex, len);
-      // stream.write(sysex, len);
-      if(i == size){
-	// last block
-	encodeInt(block, checksum);
-	send(block);
-	if(!quiet)
-	  std::cout << "checksum 0x" << std::hex << checksum << std::endl;
-	// stream.write(sysex, len);
-	// send((unsigned char*)stream.getData(), stream.getDataSize());
-      }else{
-	send(block);
-	block = MemoryBlock();
-	block.append(header, sizeof(header));
-	encodeInt(block, packageIndex++);
-	// send((unsigned char*)stream.getData(), stream.getDataSize());
-	// stream.reset();
-	// stream.write(header, sizeof(header));
-      }
+      send(block);
       if(blockDelay > 0)
 	juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter()+blockDelay);
     }
+    
+    // last block: package index and checksum
+    block = MemoryBlock();
+    block.append(header, sizeof(header));
+    encodeInt(block, packageIndex++);
+    encodeInt(block, checksum);
+    send(block);
+    if(blockDelay > 0)
+      juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter()+blockDelay);
+
+    if(!quiet)
+      std::cout << "checksum 0x" << std::hex << checksum << std::endl;
+
+    if(storeSlot >= 0){
+      const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_STORE };
+      block = MemoryBlock();
+      block.append(tailer, sizeof(tailer));
+      encodeInt(block, storeSlot);
+      send(block);
+    }else if(doRun){
+      const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_RUN };
+      block = MemoryBlock();
+      block.append(tailer, sizeof(tailer));
+      send(block);
+    }
+
     stop();
   }
 

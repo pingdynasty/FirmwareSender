@@ -1,5 +1,5 @@
 /*
-  g++ -std=c++11 -ISource -IJuceLibraryCode Source/FirmwareReceiver.cpp Source/sysex.c Source/crc32.c ../OwlNest/JuceLibraryCode/modules/juce_core/juce_core.cpp ../OwlNest/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp ../OwlNest/JuceLibraryCode/modules/juce_audio_devices/juce_audio_devices.cpp ../OwlNest/JuceLibraryCode/modules/juce_events/juce_events.cpp -lpthread -ldl -lX11 -lasound
+  g++ -g -o FirmwareReceiver -std=c++11 -ISource -IJuceLibraryCode Source/FirmwareReceiver.cpp Source/sysex.c Source/crc32.c JuceLibraryCode/modules/juce_core/juce_core.cpp JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp JuceLibraryCode/modules/juce_audio_devices/juce_audio_devices.cpp JuceLibraryCode/modules/juce_events/juce_events.cpp -lpthread -ldl -lX11 -lasound
 */
 #include <unistd.h>
 #include <stdint.h>
@@ -9,10 +9,6 @@
 #include "crc32.h"
 #include "sysex.h"
 #include "MidiStatus.h"
-
-long getSysTicks(){
-  return 0;
-}
 
 void exitProgram(){
 }
@@ -72,12 +68,12 @@ public:
     if(ret < 0){
       std::cerr << "receive error: " << ret << std::endl;
     }else if(ret > 0){
-      std::cerr << "receive complete: " << ret << " bytes. " << std::endl;
+      std::cout << "receive complete: " << ret << " bytes. " << std::endl;
       out->write(loader.getData(), loader.getSize());
       out->flush();
+      shutdown();
     }else{
-      if(verbose)
-	std::cerr << '.';
+      std::cout << '.';
     }
   }
 
@@ -163,6 +159,10 @@ public:
       out = fileout->createOutputStream();
     midiin->start();
     while(running);
+    if(out != NULL)
+      out->flush();
+    if(midiin != NULL)
+      midiin->stop();
   }
 
   uint32_t decodeInt(MemoryBlock& block){
@@ -177,13 +177,6 @@ public:
     // if(len != 5)
     //   throw CommandLineException("Error in sysex conversion"); 
     // block.append(out, len);
-  }
-
-  void stop(){
-    if(out != NULL)
-      out->flush();
-    if(midiin != NULL)
-      midiin->stop();
   }
 
   void shutdown(){
