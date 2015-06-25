@@ -40,7 +40,7 @@ private:
   int blockDelay = DEFAULT_BLOCK_DELAY;
   int blockSize = DEFAULT_BLOCK_SIZE;
   int storeSlot = -1;
-  bool doRun = true;
+  bool doRun = false;
 public:
   void listDevices(const StringArray& names){
     for(int i=0; i<names.size(); ++i)
@@ -88,7 +88,8 @@ public:
 	      << "-in FILE\tinput FILE" << std::endl
 	      << "-out DEVICE\tsend output to MIDI interface DEVICE" << std::endl
 	      << "-save FILE\twrite output to FILE" << std::endl
-	      << "-slot NUM\tstore in flash sector NUM" << std::endl
+	      << "-store NUM\tstore in slot NUM" << std::endl
+	      << "-run\t\tstart patch after upload" << std::endl
 	      << "-d NUM\t\tdelay for NUM milliseconds between blocks" << std::endl
 	      << "-s NUM\t\tlimit SysEx messages to NUM bytes" << std::endl
 	      << "-q or --quiet\treduce status output" << std::endl
@@ -116,8 +117,10 @@ public:
 	blockDelay = juce::String(argv[i]).getIntValue();
       }else if(arg.compare("-s") == 0 && ++i < argc){
 	blockSize = juce::String(argv[i]).getIntValue() - MESSAGE_SIZE;
-      }else if(arg.compare("-slot") == 0 && ++i < argc){
+      }else if(arg.compare("-store") == 0 && ++i < argc){
 	storeSlot = juce::String(argv[i]).getIntValue();
+      }else if(arg.compare("-run") == 0){
+	doRun = true;
       }else if(arg.compare("-in") == 0 && ++i < argc){
 	juce::String name = juce::String(argv[i]);
 	input = new juce::File(name);
@@ -126,6 +129,8 @@ public:
       }else if(arg.compare("-out") == 0 && ++i < argc){
 	juce::String name = juce::String(argv[i]);
 	midiout = openMidiOutput(name);
+	if(midiout == NULL)
+	  throw CommandLineException("MIDI device not available: "+name);  
       }else if(arg.compare("-save") == 0 && ++i < argc){
 	juce::String name = juce::String(argv[i]);
 	fileout = new juce::File(name);
@@ -208,6 +213,8 @@ public:
       std::cout << "checksum 0x" << std::hex << checksum << std::endl;
 
     if(storeSlot >= 0){
+      if(!quiet)
+	std::cout << "store slot " << std::hex << storeSlot << std::endl;
       const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_STORE };
       block = MemoryBlock();
       block.append(tailer, sizeof(tailer));
