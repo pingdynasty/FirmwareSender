@@ -41,6 +41,8 @@ private:
   int blockSize = DEFAULT_BLOCK_SIZE;
   int storeSlot = -1;
   bool doRun = false;
+  bool doFlash = false;
+  unsigned int flashChecksum;
 public:
   void listDevices(const StringArray& names){
     for(int i=0; i<names.size(); ++i)
@@ -90,6 +92,7 @@ public:
 	      << "-save FILE\twrite output to FILE" << std::endl
 	      << "-store NUM\tstore in slot NUM" << std::endl
 	      << "-run\t\tstart patch after upload" << std::endl
+	      << "-flash NUM\tflash firmware with checksum NUM" << std::endl
 	      << "-d NUM\t\tdelay for NUM milliseconds between blocks" << std::endl
 	      << "-s NUM\t\tlimit SysEx messages to NUM bytes" << std::endl
 	      << "-q or --quiet\treduce status output" << std::endl
@@ -121,6 +124,10 @@ public:
 	storeSlot = juce::String(argv[i]).getIntValue();
       }else if(arg.compare("-run") == 0){
 	doRun = true;
+      }else if(arg.compare("-flash") ==0 && ++i < argc){
+	doFlash = true;
+	flashChecksum = juce::String(argv[i]).getHexValue32();
+	std::cout << "Sending FLASH command with checksum " << std::hex << flashChecksum << std::endl;	
       }else if(arg.compare("-in") == 0 && ++i < argc){
 	juce::String name = juce::String(argv[i]);
 	input = new juce::File(name);
@@ -224,6 +231,12 @@ public:
       const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_RUN };
       block = MemoryBlock();
       block.append(tailer, sizeof(tailer));
+      send(block);
+    }else if(doFlash){
+      const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_FLASH };
+      block = MemoryBlock();
+      block.append(tailer, sizeof(tailer));
+      encodeInt(block, flashChecksum);
       send(block);
     }
 
