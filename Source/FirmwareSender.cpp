@@ -1,7 +1,9 @@
 /*
   g++ -std=c++11 -ISource -IJuceLibraryCode Source/FirmwareSender.cpp Source/sysex.c JuceLibraryCode/modules/juce_core/juce_core.cpp JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp JuceLibraryCode/modules/juce_audio_devices/juce_audio_devices.cpp JuceLibraryCode/modules/juce_events/juce_events.cpp -lpthread -ldl -lX11 -lasound
 */
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <stdint.h>
 #include <math.h>
 #include "JuceHeader.h"
@@ -180,8 +182,8 @@ public:
     // MemoryOutputStream stream;
     // stream.write(header, sizeof(header));
 
-    unsigned char buffer[binblock];
-    unsigned char sysex[blockSize];
+	unsigned char* buffer = (unsigned char*)alloca(binblock*sizeof(unsigned char));
+	unsigned char* sysex = (unsigned char*)alloca(blockSize*sizeof(unsigned char));
     int size = input->getSize(); // amount of data, excluding checksum
     encodeInt(block, size);
     // send first message with index and length
@@ -273,16 +275,19 @@ public:
 };
 
 FirmwareSender app;
-
+#ifndef _WIN32
 void sigfun(int sig){
   if(!quiet)
     std::cout << "shutting down" << std::endl;
   app.shutdown();
   (void)signal(SIGINT, SIG_DFL);
 }
+#endif
 
 int main(int argc, char* argv[]) {
+#ifndef _WIN32
   (void)signal(SIGINT, sigfun);
+#endif
   int status = 0;
   try{
     app.configure(argc, argv);
