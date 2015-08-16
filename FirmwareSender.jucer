@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="ByWD93" name="FirmwareSender" projectType="consoleapp" version="1.0.0"
               bundleIdentifier="com.pingdynasty.FirmwareSender" includeBinaryInAppConfig="0"
-              jucerVersion="3.1.0" defines="">
+              jucerVersion="3.2.0" defines="">
   <MAINGROUP id="K9DkuU" name="FirmwareSender">
     <GROUP id="{4B46E67F-1CBB-E89E-D4E9-09104B386A9D}" name="Source">
       <FILE id="rYJ6Qb" name="AppConfig.h" compile="0" resource="0" file="Source/AppConfig.h"/>
@@ -56,13 +56,28 @@
                        isDebug="0" optimisation="2" targetName="FirmwareSender"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_events" path="../juce"/>
-        <MODULEPATH id="juce_core" path="../juce"/>
-        <MODULEPATH id="juce_audio_formats" path="../juce"/>
-        <MODULEPATH id="juce_audio_devices" path="../juce"/>
-        <MODULEPATH id="juce_audio_basics" path="../juce"/>
+        <MODULEPATH id="juce_events" path="..\juce"/>
+        <MODULEPATH id="juce_core" path="..\juce"/>
+        <MODULEPATH id="juce_audio_formats" path="..\juce"/>
+        <MODULEPATH id="juce_audio_devices" path="..\juce"/>
+        <MODULEPATH id="juce_audio_basics" path="..\juce"/>
       </MODULEPATHS>
     </VS2010>
+    <VS2015 targetFolder="Builds/VisualStudio2015">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="FirmwareSender"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="3" targetName="FirmwareSender"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_events" path="..\juce"/>
+        <MODULEPATH id="juce_core" path="..\juce"/>
+        <MODULEPATH id="juce_audio_formats" path="..\juce"/>
+        <MODULEPATH id="juce_audio_devices" path="..\juce"/>
+        <MODULEPATH id="juce_audio_basics" path="..\juce"/>
+      </MODULEPATHS>
+    </VS2015>
   </EXPORTFORMATS>
   <MODULES>
     <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
