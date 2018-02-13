@@ -179,11 +179,8 @@ public:
     MemoryBlock block;
     block.append(header, sizeof(header));
     encodeInt(block, packageIndex++);
-    // MemoryOutputStream stream;
-    // stream.write(header, sizeof(header));
-
-	unsigned char* buffer = (unsigned char*)alloca(binblock*sizeof(unsigned char));
-	unsigned char* sysex = (unsigned char*)alloca(blockSize*sizeof(unsigned char));
+    unsigned char* buffer = (unsigned char*)alloca(binblock*sizeof(unsigned char));
+    unsigned char* sysex = (unsigned char*)alloca(blockSize*sizeof(unsigned char));
     int size = input->getSize(); // amount of data, excluding checksum
     encodeInt(block, size);
     // send first message with index and length
@@ -208,40 +205,41 @@ public:
       if(blockDelay > 0)
 	juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter()+blockDelay);
     }
-    
-    // last block: package index and checksum
-    block = MemoryBlock();
-    block.append(header, sizeof(header));
-    encodeInt(block, packageIndex++);
-    encodeInt(block, checksum);
-    send(block);
-    if(blockDelay > 0)
-      juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter()+blockDelay);
 
-    if(!quiet)
-      std::cout << "checksum 0x" << std::hex << checksum << std::endl;
+    if(running){
+      // last block: package index and checksum
+      block = MemoryBlock();
+      block.append(header, sizeof(header));
+      encodeInt(block, packageIndex++);
+      encodeInt(block, checksum);
+      send(block);
+      if(blockDelay > 0)
+	juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter()+blockDelay);
 
-    if(storeSlot >= 0){
       if(!quiet)
-	std::cout << "store slot " << std::hex << storeSlot << std::endl;
-      const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_STORE };
-      block = MemoryBlock();
-      block.append(tailer, sizeof(tailer));
-      encodeInt(block, storeSlot);
-      send(block);
-    }else if(doRun){
-      const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_RUN };
-      block = MemoryBlock();
-      block.append(tailer, sizeof(tailer));
-      send(block);
-    }else if(doFlash){
-      const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_FLASH };
-      block = MemoryBlock();
-      block.append(tailer, sizeof(tailer));
-      encodeInt(block, flashChecksum);
-      send(block);
-    }
+	std::cout << "checksum 0x" << std::hex << checksum << std::endl;
 
+      if(storeSlot >= 0){
+	if(!quiet)
+	  std::cout << "store slot " << std::hex << storeSlot << std::endl;
+	const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_STORE };
+	block = MemoryBlock();
+	block.append(tailer, sizeof(tailer));
+	encodeInt(block, storeSlot);
+	send(block);
+      }else if(doRun){
+	const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_RUN };
+	block = MemoryBlock();
+	block.append(tailer, sizeof(tailer));
+	send(block);
+      }else if(doFlash){
+	const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_FLASH };
+	block = MemoryBlock();
+	block.append(tailer, sizeof(tailer));
+	encodeInt(block, flashChecksum);
+	send(block);
+      }
+    }
     stop();
   }
 
@@ -273,13 +271,15 @@ public:
     return "FirmwareSender";
   }
 };
+ 
+FirmwareSender* app = NULL;
 
-FirmwareSender app;
 #ifndef _WIN32
 void sigfun(int sig){
   if(!quiet)
     std::cout << "shutting down" << std::endl;
-  app.shutdown();
+  if(app != NULL)
+    app->shutdown();
   (void)signal(SIGINT, SIG_DFL);
 }
 #endif
@@ -289,12 +289,14 @@ int main(int argc, char* argv[]) {
   (void)signal(SIGINT, sigfun);
 #endif
   int status = 0;
+  app = new FirmwareSender();
   try{
-    app.configure(argc, argv);
-    app.run();
+    app->configure(argc, argv);
+    app->run();
   }catch(const std::exception& exc){
     std::cerr << exc.what() << std::endl;
     status = -1;
   }
+  delete app;
   return status;
 }
