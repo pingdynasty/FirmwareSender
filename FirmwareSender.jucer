@@ -2,7 +2,8 @@
 
 <JUCERPROJECT id="ByWD93" name="FirmwareSender" projectType="consoleapp" version="1.0.0"
               bundleIdentifier="com.pingdynasty.FirmwareSender" includeBinaryInAppConfig="0"
-              jucerVersion="3.2.0" defines="">
+              jucerVersion="5.2.1" defines="" companyName="Rebel Technology"
+              companyWebsite="https://www.rebeltech.org" companyEmail="info@rebeltech.org">
   <MAINGROUP id="K9DkuU" name="FirmwareSender">
     <GROUP id="{4B46E67F-1CBB-E89E-D4E9-09104B386A9D}" name="Source">
       <FILE id="rYJ6Qb" name="AppConfig.h" compile="0" resource="0" file="Source/AppConfig.h"/>
@@ -26,43 +27,24 @@
                        targetName="FirmwareSender"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../juce/modules"/>
-        <MODULEPATH id="juce_events" path="../juce/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../juce/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../juce/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../juce/modules"/>
+        <MODULEPATH id="juce_core" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../JUCE/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
     <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-std=c++11">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="FirmwareSender"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="2" targetName="FirmwareSender"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="FirmwareSender"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="FirmwareSender"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_events" path="../juce"/>
-        <MODULEPATH id="juce_core" path="../juce"/>
-        <MODULEPATH id="juce_audio_formats" path="../juce"/>
-        <MODULEPATH id="juce_audio_devices" path="../juce"/>
-        <MODULEPATH id="juce_audio_basics" path="../juce"/>
+        <MODULEPATH id="juce_core" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2010 targetFolder="Builds/VisualStudio2010" extraCompilerFlags="-std=c++11">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="FirmwareSender"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="2" targetName="FirmwareSender"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_events" path="..\juce"/>
-        <MODULEPATH id="juce_core" path="..\juce"/>
-        <MODULEPATH id="juce_audio_formats" path="..\juce"/>
-        <MODULEPATH id="juce_audio_devices" path="..\juce"/>
-        <MODULEPATH id="juce_audio_basics" path="..\juce"/>
-      </MODULEPATHS>
-    </VS2010>
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
@@ -71,20 +53,18 @@
                        isDebug="0" optimisation="3" targetName="FirmwareSender"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_events" path="..\juce"/>
-        <MODULEPATH id="juce_core" path="..\juce"/>
-        <MODULEPATH id="juce_audio_formats" path="..\juce"/>
-        <MODULEPATH id="juce_audio_devices" path="..\juce"/>
-        <MODULEPATH id="juce_audio_basics" path="..\juce"/>
+        <MODULEPATH id="juce_core" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../JUCE/modules"/>
       </MODULEPATHS>
     </VS2015>
   </EXPORTFORMATS>
   <MODULES>
-    <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_audio_formats" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_core" showAllCode="1" useLocalCopy="1"/>
-    <MODULES id="juce_events" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
   </MODULES>
   <JUCEOPTIONS/>
 </JUCERPROJECT>

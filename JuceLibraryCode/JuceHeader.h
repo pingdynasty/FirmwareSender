@@ -10,15 +10,15 @@
 
 */
 
-#ifndef __APPHEADERFILE_BYWD93__
-#define __APPHEADERFILE_BYWD93__
+#pragma once
 
 #include "AppConfig.h"
-#include "modules/juce_audio_basics/juce_audio_basics.h"
-#include "modules/juce_audio_devices/juce_audio_devices.h"
-#include "modules/juce_audio_formats/juce_audio_formats.h"
-#include "modules/juce_core/juce_core.h"
-#include "modules/juce_events/juce_events.h"
+
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_devices/juce_audio_devices.h>
+#include <juce_core/juce_core.h>
+#include <juce_events/juce_events.h>
+
 
 #if ! DONT_SET_USING_JUCE_NAMESPACE
  // If your code uses a lot of JUCE classes, then this will obviously save you
@@ -34,5 +34,3 @@ namespace ProjectInfo
     const int          versionNumber  = 0x10000;
 }
 #endif
-
-#endif   // __APPHEADERFILE_BYWD93__

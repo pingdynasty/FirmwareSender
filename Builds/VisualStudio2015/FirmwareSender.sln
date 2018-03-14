@@ -1,6 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
-Project("{E4D178E9-DEF8-96BD-2C29-1268C976DBF3}") = "FirmwareSender", "FirmwareSender.vcxproj", "{50AE9D37-05D6-83B0-3EB1-39468B04F980}"
+
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FirmwareSender - ConsoleApp", "FirmwareSender_ConsoleApp.vcxproj", "{A1323DCF-A87A-73FC-67E6-183CB2682BA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,10 +9,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{50AE9D37-05D6-83B0-3EB1-39468B04F980}.Debug|Win32.ActiveCfg = Debug|Win32
-		{50AE9D37-05D6-83B0-3EB1-39468B04F980}.Debug|Win32.Build.0 = Debug|Win32
-		{50AE9D37-05D6-83B0-3EB1-39468B04F980}.Release|Win32.ActiveCfg = Release|Win32
-		{50AE9D37-05D6-83B0-3EB1-39468B04F980}.Release|Win32.Build.0 = Release|Win32
+		{A1323DCF-A87A-73FC-67E6-183CB2682BA5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A1323DCF-A87A-73FC-67E6-183CB2682BA5}.Debug|Win32.Build.0 = Debug|Win32
+		{A1323DCF-A87A-73FC-67E6-183CB2682BA5}.Release|Win32.ActiveCfg = Release|Win32
+		{A1323DCF-A87A-73FC-67E6-183CB2682BA5}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
