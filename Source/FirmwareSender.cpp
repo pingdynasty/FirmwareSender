@@ -16,7 +16,7 @@
 #define DEFAULT_BLOCK_SIZE (248-MESSAGE_SIZE)
 #define DEFAULT_BLOCK_DELAY 20 // wait in milliseconds between sysex messages
 
-bool quiet = false;
+static bool quiet = false;
 
 class CommandLineException : public std::exception {
 private:
@@ -44,7 +44,8 @@ private:
   int storeSlot = -1;
   bool doRun = false;
   bool doFlash = false;
-  unsigned int flashChecksum;
+  uint32_t flashChecksum;
+  uint8_t deviceNum = MIDI_SYSEX_OMNI_DEVICE;
 public:
   void listDevices(const StringArray& names){
     for(int i=0; i<names.size(); ++i)
@@ -91,6 +92,7 @@ public:
 	      << "-l or --list\tlist available MIDI ports and exit" << std::endl
 	      << "-in FILE\tinput FILE" << std::endl
 	      << "-out DEVICE\tsend output to MIDI interface DEVICE" << std::endl
+	      << "-id NUM\t\tsend to OWL device NUM" << std::endl
 	      << "-save FILE\twrite output to FILE" << std::endl
 	      << "-store NUM\tstore in slot NUM" << std::endl
 	      << "-run\t\tstart patch after upload" << std::endl
@@ -132,7 +134,7 @@ public:
 	std::cout << "Sending FLASH command with checksum " << std::hex << flashChecksum << std::endl;	
       }else if(arg.compare("-in") == 0 && ++i < argc){
 	juce::String name = juce::String(argv[i]);
-	input = new juce::File(name);
+	input = new File(File::getCurrentWorkingDirectory().getChildFile(name));
 	if(!input->exists())
 	  throw CommandLineException("No such file: "+name);
       }else if(arg.compare("-out") == 0 && ++i < argc){
@@ -142,9 +144,12 @@ public:
 	  throw CommandLineException("MIDI device not available: "+name);  
       }else if(arg.compare("-save") == 0 && ++i < argc){
 	juce::String name = juce::String(argv[i]);
-	fileout = new juce::File(name);
+	fileout = new File(File::getCurrentWorkingDirectory().getChildFile(name));
+	// fileout = new juce::File(name);
 	fileout->deleteFile();
 	fileout->create();
+      }else if(arg.compare("-id") == 0 && ++i < argc){
+	deviceNum = juce::String(argv[i]).getIntValue() | MIDI_SYSEX_OWL_DEVICE;	
       }else{
 	usage();
 	throw CommandLineException(juce::String::empty);
@@ -167,7 +172,7 @@ public:
       if(fileout != NULL)
 	std::cout << "\tto SysEx file " << fileout->getFullPathName() << std::endl;       
     }
-    const char header[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_UPLOAD };
+    const uint8_t header[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_UPLOAD };
     int binblock = (int)floor(blockSize*7/8);
     // int sysblock = (int)ceil(binblock*8/7);
 
@@ -222,18 +227,18 @@ public:
       if(storeSlot >= 0){
 	if(!quiet)
 	  std::cout << "store slot " << std::hex << storeSlot << std::endl;
-	const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_STORE };
+	const uint8_t tailer[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_STORE };
 	block = MemoryBlock();
 	block.append(tailer, sizeof(tailer));
 	encodeInt(block, storeSlot);
 	send(block);
       }else if(doRun){
-	const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_RUN };
+	const uint8_t tailer[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_RUN };
 	block = MemoryBlock();
 	block.append(tailer, sizeof(tailer));
 	send(block);
       }else if(doFlash){
-	const char tailer[] =  { MIDI_SYSEX_MANUFACTURER, MIDI_SYSEX_DEVICE, SYSEX_FIRMWARE_FLASH };
+	const uint8_t tailer[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_FLASH };
 	block = MemoryBlock();
 	block.append(tailer, sizeof(tailer));
 	encodeInt(block, flashChecksum);
