@@ -149,7 +149,7 @@ public:
 	fileout->deleteFile();
 	fileout->create();
       }else if(arg.compare("-id") == 0 && ++i < argc){
-	deviceNum = juce::String(argv[i]).getIntValue() | MIDI_SYSEX_OWL_DEVICE;	
+	deviceNum = juce::String(argv[i]).getIntValue();
       }else{
 	usage();
 	throw CommandLineException(juce::String::empty);
