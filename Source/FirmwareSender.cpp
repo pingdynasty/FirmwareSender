@@ -46,6 +46,8 @@ private:
   bool doFlash = false;
   uint32_t flashChecksum;
   uint8_t deviceNum = MIDI_SYSEX_OMNI_DEVICE;
+  uint32_t partSize = 0;
+  uint32_t slotSize = 128*1024;
 public:
   void listDevices(const StringArray& names){
     for(int i=0; i<names.size(); ++i)
@@ -93,6 +95,7 @@ public:
 	      << "-in FILE\tinput FILE" << std::endl
 	      << "-out DEVICE\tsend output to MIDI interface DEVICE" << std::endl
 	      << "-id NUM\t\tsend to OWL device NUM" << std::endl
+	      << "-split NUM\tsplit into parts of no more than NUM kilobytes of data" << std::endl
 	      << "-save FILE\twrite output to FILE" << std::endl
 	      << "-store NUM\tstore in slot NUM" << std::endl
 	      << "-run\t\tstart patch after upload" << std::endl
@@ -146,10 +149,10 @@ public:
 	juce::String name = juce::String(argv[i]);
 	fileout = new File(File::getCurrentWorkingDirectory().getChildFile(name));
 	// fileout = new juce::File(name);
-	fileout->deleteFile();
-	fileout->create();
       }else if(arg.compare("-id") == 0 && ++i < argc){
 	deviceNum = juce::String(argv[i]).getIntValue();
+      }else if(arg.compare("-split") == 0 && ++i < argc){
+	partSize = juce::String(argv[i]).getIntValue() * 1024;
       }else{
 	usage();
 	throw CommandLineException(juce::String::empty);
@@ -172,27 +175,48 @@ public:
       if(fileout != NULL)
 	std::cout << "\tto SysEx file " << fileout->getFullPathName() << std::endl;       
     }
+    juce::ScopedPointer<InputStream> in = input->createInputStream();
+    int size = input->getSize(); // amount of data, excluding checksum
+    int part = 0;
+    while(partSize && size > partSize){
+      sendPart(in, partSize);
+      size -= partSize;
+      if(fileout != NULL){
+	fileout = new File(fileout->getNonexistentSibling());
+	std::cout << "\tto SysEx file " << fileout->getFullPathName() << std::endl;
+      }
+      if(storeSlot >= 0)
+	storeSlot += partSize/slotSize;
+    }
+    sendPart(in, size);
+    stop();
+  }
+
+  void sendPart(InputStream* in, int size){
+    if(verbose)
+      std::cout << "sending " << std::dec << size << " bytes" << std::endl;
+		
     const uint8_t header[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_UPLOAD };
     int binblock = (int)floor(blockSize*7/8);
-    // int sysblock = (int)ceil(binblock*8/7);
 
-    juce::ScopedPointer<InputStream> in = input->createInputStream();
-    if(fileout != NULL)
+    if(fileout != NULL){
+      fileout->deleteFile();
+      fileout->create();
       out = fileout->createOutputStream();
-
+    }
     int packageIndex = 0;
     MemoryBlock block;
     block.append(header, sizeof(header));
     encodeInt(block, packageIndex++);
     unsigned char* buffer = (unsigned char*)alloca(binblock*sizeof(unsigned char));
     unsigned char* sysex = (unsigned char*)alloca(blockSize*sizeof(unsigned char));
-    int size = input->getSize(); // amount of data, excluding checksum
     encodeInt(block, size);
     // send first message with index and length
     send(block);
 
     uint32_t checksum = 0;
     for(int i=0; i < size && running;){
+      binblock = std::min(binblock, size-i);
       block = MemoryBlock();
       block.append(header, sizeof(header));
       encodeInt(block, packageIndex++);
@@ -245,7 +269,6 @@ public:
 	send(block);
       }
     }
-    stop();
   }
 
   void encodeInt(MemoryBlock& block, uint32_t data){
