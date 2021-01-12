@@ -42,6 +42,7 @@ private:
   int blockDelay = DEFAULT_BLOCK_DELAY;
   int blockSize = DEFAULT_BLOCK_SIZE;
   int storeSlot = -1;
+  const char* saveName = NULL;
   bool doRun = false;
   bool doFlash = false;
   uint32_t flashChecksum;
@@ -98,6 +99,7 @@ public:
 	      << "-split NUM\tsplit into parts of no more than NUM kilobytes of data" << std::endl
 	      << "-save FILE\twrite output to FILE" << std::endl
 	      << "-store NUM\tstore in slot NUM" << std::endl
+	      << "-name NAME\tsave resource as NAME" << std::endl
 	      << "-run\t\tstart patch after upload" << std::endl
 	      << "-flash NUM\tflash firmware with checksum NUM" << std::endl
 	      << "-d NUM\t\tdelay for NUM milliseconds between blocks" << std::endl
@@ -129,6 +131,8 @@ public:
 	blockSize = juce::String(argv[i]).getIntValue() - MESSAGE_SIZE;
       }else if(arg.compare("-store") == 0 && ++i < argc){
 	storeSlot = juce::String(argv[i]).getIntValue();
+      }else if(arg.compare("-name") == 0 && ++i < argc){
+	saveName = juce::String(argv[i]).toUTF8();
       }else if(arg.compare("-run") == 0){
 	doRun = true;
       }else if(arg.compare("-flash") ==0 && ++i < argc){
@@ -256,6 +260,14 @@ public:
 	block.append(tailer, sizeof(tailer));
 	encodeInt(block, storeSlot);
 	send(block);
+      }else if(saveName != NULL){
+	if(!quiet)
+	  std::cout << "save resource " << saveName << std::endl;
+	const uint8_t tailer[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_SAVE };
+	block = MemoryBlock();
+	block.append(tailer, sizeof(tailer));
+	block.append(saveName, strlen(saveName)+1); // include trailing \0
+	send(block);	
       }else if(doRun){
 	const uint8_t tailer[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_RUN };
 	block = MemoryBlock();
