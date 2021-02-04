@@ -42,7 +42,7 @@ private:
   int blockDelay = DEFAULT_BLOCK_DELAY;
   int blockSize = DEFAULT_BLOCK_SIZE;
   int storeSlot = -1;
-  const char* saveName = NULL;
+  juce::String saveName;
   bool doRun = false;
   bool doFlash = false;
   uint32_t flashChecksum;
@@ -132,7 +132,9 @@ public:
       }else if(arg.compare("-store") == 0 && ++i < argc){
 	storeSlot = juce::String(argv[i]).getIntValue();
       }else if(arg.compare("-name") == 0 && ++i < argc){
-	saveName = juce::String(argv[i]).toUTF8();
+	juce::String saveName = juce::String(argv[i]);
+	if(!quiet)
+	  std::cout << "Saving resource with name: " << saveName << std::endl;
       }else if(arg.compare("-run") == 0){
 	doRun = true;
       }else if(arg.compare("-flash") ==0 && ++i < argc){
@@ -260,13 +262,11 @@ public:
 	block.append(tailer, sizeof(tailer));
 	encodeInt(block, storeSlot);
 	send(block);
-      }else if(saveName != NULL){
-	if(!quiet)
-	  std::cout << "save resource " << saveName << std::endl;
+      }else if(saveName.isNotEmpty()){
 	const uint8_t tailer[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_SAVE };
 	block = MemoryBlock();
 	block.append(tailer, sizeof(tailer));
-	block.append(saveName, strlen(saveName)+1); // include trailing \0
+	block.append(saveName.toUTF8(), saveName.getNumBytesAsUTF8()+1); // include trailing \0
 	send(block);	
       }else if(doRun){
 	const uint8_t tailer[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_RUN };
