@@ -132,9 +132,7 @@ public:
       }else if(arg.compare("-store") == 0 && ++i < argc){
 	storeSlot = juce::String(argv[i]).getIntValue();
       }else if(arg.compare("-name") == 0 && ++i < argc){
-	juce::String saveName = juce::String(argv[i]);
-	if(!quiet)
-	  std::cout << "Saving resource with name: " << saveName << std::endl;
+	saveName = juce::String(argv[i]);
       }else if(arg.compare("-run") == 0){
 	doRun = true;
       }else if(arg.compare("-flash") ==0 && ++i < argc){
@@ -263,6 +261,8 @@ public:
 	encodeInt(block, storeSlot);
 	send(block);
       }else if(saveName.isNotEmpty()){
+	if(!quiet)
+	  std::cout << "Saving resource with name: " << saveName << std::endl;
 	const uint8_t tailer[] =  { MIDI_SYSEX_MANUFACTURER, deviceNum, SYSEX_FIRMWARE_SAVE };
 	block = MemoryBlock();
 	block.append(tailer, sizeof(tailer));
