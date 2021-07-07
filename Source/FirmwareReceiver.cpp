@@ -10,12 +10,36 @@
 #include "sysex.h"
 #include "MidiStatus.h"
 
-void exitProgram(){
+#define MAX_SYSEX_PAYLOAD_SIZE (8*1024*1024)
+#define NO_ERROR         0x00
+#define HARDFAULT_ERROR  0x10
+#define BUS_ERROR        0x20
+#define MEM_ERROR        0x30
+#define NMI_ERROR        0x40
+#define USAGE_ERROR      0x50
+#define PROGRAM_ERROR    0x60
+#define CONFIG_ERROR     0x70
+#define FLASH_ERROR      0x80
+#define USB_ERROR        0x90
+#define RUNTIME_ERROR    0xa0
+
+static int8_t errorcode;
+
+void error(int8_t code, const char* reason){
+  printf("%s\n", reason);
+  errorcode = -1;
+  // exit(-1);
 }
 
+void setErrorStatus(int8_t err){
+  errorcode = err;
+}
+
+#define USE_EXTERNAL_RAM
 uint8_t rx_buffer[1024*1024];
-#define EXTRAM rx_buffer
+#define _EXTRAM rx_buffer
 #define MAX_SYSEX_FIRMWARE_SIZE (80*1024)
+
 #include "FirmwareLoader.hpp"
 
 #define MESSAGE_SIZE 8
@@ -58,22 +82,27 @@ public:
     uint16_t size = message.getRawDataSize();
     data += 1;
     size -= 2;
-    if(size < 3 || 
-       data[0] != MIDI_SYSEX_MANUFACTURER || 
-       data[1] != MIDI_SYSEX_DEVICE ||
-       data[2] != SYSEX_FIRMWARE_UPLOAD){
-      std::cout << "rx unknown or invalid message" << std::endl;
-    }
-    int32_t ret = loader.handleFirmwareUpload(data, size);
-    if(ret < 0){
-      std::cerr << "receive error: " << ret << std::endl;
-    }else if(ret > 0){
-      std::cout << "receive complete: " << ret << " bytes. " << std::endl;
-      out->write(loader.getData(), loader.getSize());
-      out->flush();
-      shutdown();
+    if(size > 3 && 
+       data[0] == MIDI_SYSEX_MANUFACTURER || 
+       data[1] == MIDI_SYSEX_OWL_DEVICE) {
+      if(data[2] == SYSEX_FIRMWARE_UPLOAD){
+	
+	int32_t ret = loader.handleFirmwareUpload(data, size);
+	if(ret < 0){
+	  std::cerr << "receive error: " << ret << std::endl;
+	}else if(ret > 0){
+	  std::cout << "receive complete: " << ret << " bytes. " << std::endl;
+	  out->write(loader.getData(), loader.getSize());
+	  out->flush();
+	  if(verbose)
+	    std::cout << "crc32: 0x" << std::hex << loader.getChecksum() << std::endl;
+	  shutdown();
+	}else{
+	  std::cout << '.';
+	}
+      }
     }else{
-      std::cout << '.';
+      std::cout << "rx unknown or invalid SysEx message" << std::endl;
     }
   }
 
@@ -188,24 +217,31 @@ public:
   }
 };
 
-FirmwareReceiver app;
+FirmwareReceiver* app = NULL;
 
+#ifndef _WIN32
 void sigfun(int sig){
   if(!quiet)
     std::cout << "shutting down" << std::endl;
-  app.shutdown();
+  if(app != NULL)
+    app->shutdown();
   (void)signal(SIGINT, SIG_DFL);
 }
+#endif
 
 int main(int argc, char* argv[]) {
+#ifndef _WIN32
   (void)signal(SIGINT, sigfun);
+#endif
   int status = 0;
+  app = new FirmwareReceiver();
   try{
-    app.configure(argc, argv);
-    app.run();
+    app->configure(argc, argv);
+    app->run();
   }catch(const std::exception& exc){
     std::cerr << exc.what() << std::endl;
     status = -1;
   }
+  delete app;
   return status;
 }
