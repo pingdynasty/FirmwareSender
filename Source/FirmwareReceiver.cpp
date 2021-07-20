@@ -36,11 +36,12 @@ void setErrorStatus(int8_t err){
 }
 
 #define USE_EXTERNAL_RAM
-uint8_t rx_buffer[1024*1024];
 #define _EXTRAM rx_buffer
 #define MAX_SYSEX_FIRMWARE_SIZE (80*1024)
 
 #include "FirmwareLoader.hpp"
+
+uint8_t rx_buffer[8*1024*1024];
 
 #define MESSAGE_SIZE 8
 #define DEFAULT_BLOCK_SIZE (248-MESSAGE_SIZE)
@@ -92,7 +93,7 @@ public:
 	  std::cerr << "receive error: " << ret << std::endl;
 	}else if(ret > 0){
 	  std::cout << "receive complete: " << ret << " bytes. " << std::endl;
-	  out->write(loader.getData(), loader.getSize());
+	  out->write(loader.getData(), loader.getDataSize());
 	  out->flush();
 	  if(verbose)
 	    std::cout << "crc32: 0x" << std::hex << loader.getChecksum() << std::endl;
