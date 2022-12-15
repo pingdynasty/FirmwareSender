@@ -1,0 +1,87 @@
+name: Build
+run-name: ${{ github.actor }} is Building 🚀
+on: [push]
+
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  JUCE_VERSION: "7.0.3"
+
+jobs:
+  build-osx:
+    name: Build for OSX
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download JUCE
+        run: curl -L https://github.com/juce-framework/JUCE/releases/download/${{ env.JUCE_VERSION }}/juce-${{ env.JUCE_VERSION }}-osx.zip -o juce-${{ env.JUCE_VERSION }}-osx.zip
+      - name: Extract JUCE
+        run: unzip -q juce-${{ env.JUCE_VERSION }}-osx.zip
+      - name: Generate Builds (resave)
+        run: ./JUCE/Projucer.app/Contents/MacOS/Projucer --resave FirmwareSender.jucer
+      - name: Build
+        run: cd Builds/MacOSX && xcodebuild -configuration Release
+      - name: Zip
+        run: cd Builds/MacOSX/build/Release && zip FirmwareSender-osx.zip FirmwareSender
+      - uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.sha }}
+          tag_name: ${{ github.ref }}
+          target_commitish: ${{ github.sha }}
+          files: Builds/MacOSX/build/Release/FirmwareSender-osx.zip
+          draft: true
+          prerelease: true
+
+  build-ubuntu:
+    name: Build for Ubuntu
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies
+        run: sudo apt-get install -y libasound2-dev libjack-jackd2-dev libcurl4-openssl-dev
+      - uses: actions/checkout@v3
+      - name: Download JUCE
+        run: curl -L https://github.com/juce-framework/JUCE/releases/download/${{ env.JUCE_VERSION }}/juce-${{ env.JUCE_VERSION }}-linux.zip -o juce-${{ env.JUCE_VERSION }}-linux.zip
+      - name: Extract JUCE
+        run: unzip -q juce-${{ env.JUCE_VERSION }}-linux.zip
+      - name: Generate Builds (resave)
+        run: ./JUCE/Projucer --resave FirmwareSender.jucer
+      - name: Build
+        run: cd Builds/LinuxMakefile && make
+      - name: Zip
+        run: cd Builds/LinuxMakefile/build && zip FirmwareSender-ubuntu.zip FirmwareSender
+      - uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.sha }}
+          tag_name: ${{ github.ref }}
+          target_commitish: ${{ github.sha }}
+          files: Builds/LinuxMakefile/build/FirmwareSender-ubuntu.zip
+          draft: true
+          prerelease: true
+
+  build-windows:
+    name: Build for Windows
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download JUCE
+        run: curl -L https://github.com/juce-framework/JUCE/releases/download/${{ env.JUCE_VERSION }}/juce-${{ env.JUCE_VERSION }}-windows.zip -o juce-${{ env.JUCE_VERSION }}-windows.zip
+      - name: Extract JUCE
+        run: unzip -q juce-${{ env.JUCE_VERSION }}-windows.zip
+      - name: Generate Builds (resave)
+        run: JUCE/Projucer.exe --resave FirmwareSender.jucer
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Build
+        run: cd Builds/VisualStudio2022 && msbuild FirmwareSender_ConsoleApp.vcxproj /p:configuration=release /p:platform=x64
+      - name: Zip
+        run: cd Builds/VisualStudio2022/x64/release/ConsoleApp && Compress-Archive FirmwareSender.exe FirmwareSender-windows.zip
+      - uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.sha }}
+          tag_name: ${{ github.ref }}
+          target_commitish: ${{ github.sha }}
+          files: Builds/VisualStudio2022/x64/release/ConsoleApp/FirmwareSender-windows.zip
+          draft: true
+          prerelease: true
