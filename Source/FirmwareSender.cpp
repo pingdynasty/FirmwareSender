@@ -114,7 +114,7 @@ public:
       juce::String arg = juce::String(argv[i]);
       if(arg.compare("-h") == 0 || arg.compare("--help") == 0 ){
 	usage();
-	throw CommandLineException(juce::String::empty);
+	throw CommandLineException(juce::String());
       }else if(arg.compare("-q") == 0 || arg.compare("--quiet") == 0 ){
 	quiet = true;
       }else if(arg.compare("-v") == 0 || arg.compare("--verbose") == 0 ){
@@ -124,7 +124,7 @@ public:
 	listDevices(MidiInput::getAvailableDevices());
 	std::cout << "MIDI output devices:" << std::endl;
 	listDevices(MidiOutput::getAvailableDevices());
-	throw CommandLineException(juce::String::empty);
+	throw CommandLineException(juce::String());
       }else if(arg.compare("-d") == 0 && ++i < argc){
 	blockDelay = juce::String(argv[i]).getIntValue();
       }else if(arg.compare("-s") == 0 && ++i < argc){
@@ -159,12 +159,12 @@ public:
 	partSize = juce::String(argv[i]).getIntValue() * 1024;
       }else{
 	usage();
-	throw CommandLineException(juce::String::empty);
+	throw CommandLineException(juce::String());
       }
     }
     if(input == NULL || (midiout == NULL && fileout == NULL)){
       usage();
-      throw CommandLineException(juce::String::empty);
+      throw CommandLineException(juce::String());
     }
     if(midiout == NULL && blockDelay == DEFAULT_BLOCK_DELAY)
       blockDelay = 0;
