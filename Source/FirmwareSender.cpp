@@ -75,7 +75,7 @@ public:
     send((unsigned char*)block.getData(), block.getSize());
   }
 
-  void send(unsigned char* data, int size){
+  void send(unsigned char* data, size_t size){
     if(verbose)
       std::cout << "sending " << std::dec << size << " bytes" << std::endl;
     if(out != NULL){
@@ -85,7 +85,7 @@ public:
       out->flush();
     }
     if(midiout != NULL)
-      midiout->sendMessageNow(juce::MidiMessage::createSysExMessage(data, size));
+      midiout->sendMessageNow(juce::MidiMessage::createSysExMessage(data, (int)size));
   }
 
   void usage(){
@@ -180,7 +180,7 @@ public:
 	std::cout << "\tto SysEx file " << fileout->getFullPathName() << std::endl;       
     }
     std::unique_ptr<InputStream> in = input->createInputStream();
-    int size = input->getSize(); // amount of data, excluding checksum
+    size_t size = input->getSize(); // amount of data, excluding checksum
     while(partSize && size > partSize){
       sendPart(in.get(), partSize);
       size -= partSize;
@@ -195,7 +195,7 @@ public:
     stop();
   }
 
-  void sendPart(InputStream* in, int size){
+  void sendPart(InputStream* in, size_t size){
     if(verbose)
       std::cout << "sending " << std::dec << size << " bytes" << std::endl;
 		
@@ -213,13 +213,13 @@ public:
     encodeInt(block, packageIndex++);
     unsigned char* buffer = (unsigned char*)alloca(binblock*sizeof(unsigned char));
     unsigned char* sysex = (unsigned char*)alloca(blockSize*sizeof(unsigned char));
-    encodeInt(block, size);
+    encodeInt(block, (uint32_t)size);
     // send first message with index and length
     send(block);
 
     uint32_t checksum = 0;
     for(int i=0; i < size && running;){
-      binblock = std::min(binblock, size-i);
+      binblock = std::min(binblock, (int)(size-i));
       block = MemoryBlock();
       block.append(header, sizeof(header));
       encodeInt(block, packageIndex++);
