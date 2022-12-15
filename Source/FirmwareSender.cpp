@@ -35,10 +35,10 @@ class FirmwareSender {
 private:
   bool running = false;
   bool verbose = false;
-  juce::ScopedPointer<MidiOutput> midiout;
-  juce::ScopedPointer<File> fileout;
-  juce::ScopedPointer<File> input;
-  juce::ScopedPointer<OutputStream> out;
+  std::unique_ptr<MidiOutput> midiout;
+  std::unique_ptr<File> fileout;
+  std::unique_ptr<File> input;
+  std::unique_ptr<OutputStream> out;
   int blockDelay = DEFAULT_BLOCK_DELAY;
   int blockSize = DEFAULT_BLOCK_SIZE;
   int storeSlot = -1;
@@ -141,7 +141,7 @@ public:
 	std::cout << "Sending FLASH command with checksum " << std::hex << flashChecksum << std::endl;	
       }else if(arg.compare("-in") == 0 && ++i < argc){
 	juce::String name = juce::String(argv[i]);
-	input = new File(File::getCurrentWorkingDirectory().getChildFile(name));
+	input = std::make_unique<File>(File::getCurrentWorkingDirectory().getChildFile(name));
 	if(!input->exists())
 	  throw CommandLineException("No such file: "+name);
       }else if(arg.compare("-out") == 0 && ++i < argc){
@@ -151,7 +151,7 @@ public:
 	  throw CommandLineException("MIDI device not available: "+name);  
       }else if(arg.compare("-save") == 0 && ++i < argc){
 	juce::String name = juce::String(argv[i]);
-	fileout = new File(File::getCurrentWorkingDirectory().getChildFile(name));
+	fileout = std::make_unique<File>(File::getCurrentWorkingDirectory().getChildFile(name));
 	// fileout = new juce::File(name);
       }else if(arg.compare("-id") == 0 && ++i < argc){
 	deviceNum = juce::String(argv[i]).getIntValue();
@@ -179,20 +179,20 @@ public:
       if(fileout != NULL)
 	std::cout << "\tto SysEx file " << fileout->getFullPathName() << std::endl;       
     }
-    juce::ScopedPointer<InputStream> in = input->createInputStream();
+    std::unique_ptr<InputStream> in = input->createInputStream();
     int size = input->getSize(); // amount of data, excluding checksum
     int part = 0;
     while(partSize && size > partSize){
-      sendPart(in, partSize);
+      sendPart(in.get(), partSize);
       size -= partSize;
       if(fileout != NULL){
-	fileout = new File(fileout->getNonexistentSibling());
+	fileout = std::make_unique<File>(fileout->getNonexistentSibling());
 	std::cout << "\tto SysEx file " << fileout->getFullPathName() << std::endl;
       }
       if(storeSlot >= 0)
 	storeSlot += partSize/slotSize;
     }
-    sendPart(in, size);
+    sendPart(in.get(), size);
     stop();
   }
 
