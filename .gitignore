@@ -26,3 +26,10 @@
 *.exe
 *.out
 *.app
+
+Builds/
+JuceLibraryCode/
+.DS_Store
+.vscode/
+JUCE
+juce-*
