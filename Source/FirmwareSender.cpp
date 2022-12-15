@@ -50,19 +50,19 @@ private:
   uint32_t partSize = 0;
   uint32_t slotSize = 128*1024;
 public:
-  void listDevices(const StringArray& names){
-    for(int i=0; i<names.size(); ++i)
-      std::cout << i << ": " << names[i] << std::endl;
+  void listDevices(const Array<MidiDeviceInfo>& devices){
+    for(int i=0; i<devices.size(); ++i)
+      std::cout << i << ": " << devices[i].name << std::endl;
   }
 
-  MidiOutput* openMidiOutput(const String& name){
-    MidiOutput* output = NULL;    
-    StringArray outputs = MidiOutput::getDevices();
+  std::unique_ptr<MidiOutput> openMidiOutput(const String& name){
+    std::unique_ptr<MidiOutput> output = NULL;
+    Array<MidiDeviceInfo> outputs = MidiOutput::getAvailableDevices();
     for(int i=0; i<outputs.size(); ++i){
-      if(outputs[i].trim().matchesWildcard(name, true)){
+      if(outputs[i].name.trim().matchesWildcard(name, true)){
 	if(verbose)
-	  std::cout << "opening MIDI output " << outputs[i] << std::endl;
-	output = MidiOutput::openDevice(i);
+	  std::cout << "opening MIDI output " << outputs[i].name << std::endl;
+	output = MidiOutput::openDevice(outputs[i].identifier);
 	break;
       }
     }
@@ -121,9 +121,9 @@ public:
 	verbose = true;
       }else if(arg.compare("-l") == 0 || arg.compare("--list") == 0){
 	std::cout << "MIDI input devices:" << std::endl;
-	listDevices(MidiInput::getDevices());
+	listDevices(MidiInput::getAvailableDevices());
 	std::cout << "MIDI output devices:" << std::endl;
-	listDevices(MidiOutput::getDevices());
+	listDevices(MidiOutput::getAvailableDevices());
 	throw CommandLineException(juce::String::empty);
       }else if(arg.compare("-d") == 0 && ++i < argc){
 	blockDelay = juce::String(argv[i]).getIntValue();
