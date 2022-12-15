@@ -324,6 +324,7 @@ void sigfun(int sig){
 #endif
 
 int main(int argc, char* argv[]) {
+  ScopedJuceInitialiser_GUI scopedJuceGui;
 #ifndef _WIN32
   (void)signal(SIGINT, sigfun);
 #endif
