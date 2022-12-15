@@ -181,7 +181,6 @@ public:
     }
     std::unique_ptr<InputStream> in = input->createInputStream();
     int size = input->getSize(); // amount of data, excluding checksum
-    int part = 0;
     while(partSize && size > partSize){
       sendPart(in.get(), partSize);
       size -= partSize;
